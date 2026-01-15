@@ -82,8 +82,25 @@ def load_model():
     
     if os.path.exists(MODEL_PATH):
         print(f"Loading existing model from {MODEL_PATH}...")
-        model = keras.models.load_model(MODEL_PATH)
-        print("Model loaded successfully!")
+        try:
+            model = keras.models.load_model(MODEL_PATH)
+            print("Model loaded successfully (full model)!")
+        except Exception as e:
+            # Fallback: deployment environment may reject some saved-layer configs
+            print("Full model load failed:", e)
+            weights_path = 'az_letters.weights.h5'
+            if os.path.exists(weights_path):
+                print(f"Attempting to build architecture and load weights from {weights_path}...")
+                try:
+                    model = create_model()
+                    model.load_weights(weights_path)
+                    print("Model architecture created and weights loaded successfully!")
+                except Exception as e2:
+                    print("Failed to load weights fallback:", e2)
+                    raise
+            else:
+                # No weights fallback available; re-raise the original error
+                raise
     else:
         print("No existing model found. Training new model...")
         model = train_model()
