@@ -1,0 +1,10 @@
+gunicorn>=21.0.0
+tensorflow-datasets>=4.9.2
+
+flask
+flask-cors
+tensorflow
+numpy
+pillow
+scipy
+gunicorn
