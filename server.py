@@ -24,7 +24,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import base64
 from io import BytesIO
-from PIL import Imagegit
+from PIL import Image
 
 # Serve static files from current directory
 app = Flask(__name__, static_folder='.', static_url_path='')
