@@ -27,7 +27,7 @@ An interactive web application for handwritten A–Z letter recognition using de
 ├── network.js               # API client (frontend-backend communication)
 ├── visualization.js         # Neural network visualization
 ├── requirements.txt         # Python dependencies
-├── Procfile                 # Gunicorn deployment config
+├── Dockerfile               # Container build for Railway/Fly.io
 ├── templates/               # HTML templates
 ├── static/                  # Static assets (if any)
 ```
@@ -61,12 +61,24 @@ An interactive web application for handwritten A–Z letter recognition using de
 
    Go to [http://localhost:5000](http://localhost:5000)
 
-## 🌐 Deployment (Render Free Tier)
 
-- Uses Gunicorn for production: see `Procfile`.
-- Place all files in the root directory as shown above.
-- No background jobs, keep-alive, or polling required.
-- Model loads once at startup for fast cold-starts.
+## 🌐 Deployment (Railway Free Tier)
+
+1. Push your code to GitHub.
+2. On Railway, click "New Project" → "Deploy from GitHub repo" and select this repository.
+3. No extra environment variables are needed.
+4. Service will sleep when idle; no keep-alive or polling logic.
+5. For large models, ensure file size <100MB for Railway Free Tier.
+
+**Resource-saving tips:**
+- Model loads once at startup, not per request.
+- No background jobs, polling, or keep-alive logic.
+- Minimal dependencies and logging.
+
+**Frontend:**
+- Use an HTML `<canvas>` for drawing.
+- Add a “Predict” button that, when clicked, sends the canvas image as base64 to `/predict`.
+- Do NOT send requests automatically or on every stroke.
 
 ## 🧠 How It Works
 
