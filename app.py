@@ -1,20 +1,23 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import numpy as np
 
-# Resource-efficient, Railway-ready Flask+TensorFlow app
+# Resource-efficient, Render-ready Flask+TensorFlow app
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import numpy as np
 from PIL import Image
 import base64
 import io
 from tensorflow import keras
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+
+@app.route("/")
+def index():
+    """Serve the main page"""
+    return send_from_directory('.', 'index.html')
 
 # Load model once at startup
 MODEL_PATH = "az_letters_model.keras"
@@ -42,7 +45,12 @@ def predict():
 def health():
     return jsonify({"status": "ok"})
 
+
+# Serve static files (JS, CSS)
+@app.route("/<path:filename>")
+def serve_static(filename):
+    return send_from_directory('.', filename)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)), debug=False)
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)), debug=False)
