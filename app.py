@@ -41,7 +41,7 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-def health():
+
 @app.route("/health")
 def health():
     global model
