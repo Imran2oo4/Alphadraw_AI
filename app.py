@@ -121,9 +121,12 @@ def predict():
 
 @app.route("/health")
 def health():
-    global model
-    loaded = model is not None
-    return jsonify({"status": "ok", "model_loaded": loaded})
+    """Health check - also triggers lazy model loading"""
+    try:
+        get_model()  # Trigger lazy load if not already loaded
+        return jsonify({"status": "ok", "model_loaded": True})
+    except Exception as e:
+        return jsonify({"status": "error", "model_loaded": False, "error": str(e)}), 500
 
 
 # Serve static files (JS, CSS)
