@@ -41,9 +41,12 @@ def predict():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def health():
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok"})
+    global model
+    loaded = model is not None
+    return jsonify({"status": "ok", "model_loaded": loaded})
 
 
 # Serve static files (JS, CSS)
