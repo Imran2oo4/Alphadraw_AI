@@ -5,6 +5,16 @@ import numpy as np
 # Resource-efficient, Render-ready Flask+TensorFlow app
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+# Limit TensorFlow memory
+import tensorflow as tf
+tf.config.set_soft_device_placement(True)
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+
 from PIL import Image
 import base64
 import io
@@ -13,15 +23,28 @@ from tensorflow import keras
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Global model variable - lazy load
+model = None
+MODEL_PATH = "az_letters_model.keras"
+
+def get_model():
+    """Lazy load the model to avoid startup memory issues"""
+    global model
+    if model is None:
+        print(f"Loading model from {MODEL_PATH}...")
+        try:
+            model = keras.models.load_model(MODEL_PATH)
+            print("Model loaded successfully!")
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            raise
+    return model
+
 
 @app.route("/")
 def index():
     """Serve the main page"""
     return send_from_directory('.', 'index.html')
-
-# Load model once at startup
-MODEL_PATH = "az_letters_model.keras"
-model = keras.models.load_model(MODEL_PATH)
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -48,7 +71,9 @@ def predict():
         else:
             return jsonify({"error": "No image or pixels provided"}), 400
         
-        preds = model.predict(img_array, verbose=0)[0]
+        # Get model (lazy load)
+        m = get_model()
+        preds = m.predict(img_array, verbose=0)[0]
         letter = chr(65 + int(np.argmax(preds)))
         
         # Generate activations for visualization (simulated hidden layers)

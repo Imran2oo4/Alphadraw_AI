@@ -1,8 +1,7 @@
 
-
 flask
 flask-cors
-tensorflow
+tensorflow-cpu
 numpy
 pillow
 scipy
